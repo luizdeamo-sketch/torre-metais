@@ -1,5 +1,11 @@
 /* Quadro de Novidades: o que mudou em cada versão (a mais nova primeiro). */
 window.NOVIDADES = [
+  { versao: "2026-10-28-2200", data: "28/10/2026", itens: [
+    "Menu mais curto: Apresentação, Hoje, Metais, Minha compra e Sugestões. O Radar virou os Avisos do Hoje, e o Dólar é um item de Metais.",
+    "O Hoje virou um quadro de cotações: os 8 metais e o dólar numa tabela, com preço em R$/t, variação e termômetro, e ao lado os avisos e os seus preços-alvo.",
+    "Cada metal abre com os números-chave no topo: termômetro, faixa provável em 30 dias e peso do dólar. O que é detalhe abre com um toque.",
+    "Minha compra (antigo Simulador): formulário ao lado do resultado e o plano em 4 lotes semanais.",
+  ] },
   { versao: "2026-10-28-2100", data: "28/10/2026", itens: [
     "Os índices de compra e venda deram lugar ao Termômetro do ano: 0 é o dia mais barato dos últimos 12 meses, 100 o mais caro. Ele diz onde o preço está, não para onde vai.",
     "Risco dos próximos 30 dias em cada metal, com a memória da LME desde 2009: quanto o preço costuma mexer e quanto comprar em 4 lotes semanais protege.",
