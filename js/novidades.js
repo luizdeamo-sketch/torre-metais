@@ -1,5 +1,9 @@
 /* Quadro de Novidades: o que mudou em cada versão (a mais nova primeiro). */
 window.NOVIDADES = [
+  { versao: "2026-10-28-2000", data: "28/10/2026", itens: [
+    "\"Este sinal acerta?\" agora usa 15 anos da LME (2009 a 2026) e mostra o acerto separado em dois períodos: até 2019 e de 2020 para cá.",
+    "No Radar, \"Como a torre decide\" mostra o teste completo do índice, com o acerto do sinal contra o acerto de comprar ou vender em qualquer dia.",
+  ] },
   { versao: "2026-10-28-1900", data: "28/10/2026", itens: [
     "Visual novo, mais limpo no celular e no computador: logo, fontes e cores da Torre de Controle - Metais.",
     "Índice de compra e Índice de venda (0 a 100) em cada metal, com o histórico e quantas vezes um sinal igual acertou no passado.",

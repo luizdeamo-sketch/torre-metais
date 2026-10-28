@@ -61,6 +61,15 @@
     return a.map((p, i) => i < n - 1 ? null : media(a.slice(i - n + 1, i + 1).map(x => x[campo])));
   }
   const limita = v => Math.max(0, Math.min(100, Math.round(v)));
+
+  // Pesos do índice. Os valores vêm da calibração com o histórico (coletor/calibrar.js, relatório em coletor/calibracao.md).
+  // Cada peso multiplica um sinal: valor (onde o preço está na janela), tendencia, spread (imediato × 3 meses), estoque, dolar, semana.
+  // Peso negativo inverte o sinal (ex.: tendência de alta passa a pesar a favor de vender, não de comprar).
+  const CFG = window.TM_PESOS || {
+    janela: 365,
+    compra: { valor: 1, tendencia: 1, spread: 1, estoque: 1, dolar: 1, semana: 1 },
+    venda: { valor: 1, tendencia: 1, spread: 1, estoque: 1, dolar: 1, semana: 1 },
+  };
   const virg = (v, d = 1) => v.toFixed(d).replace(".", ",");
 
   // Onde o dólar estava no ano, em cada dia (0 = o mais barato do ano, 100 = o mais caro).
@@ -77,23 +86,23 @@
   // Tudo calculado só com o que se sabia até aquele dia (serve para o histórico sem "olhar o futuro").
   function leituraEm(chave, i) {
     const a = serie(chave), h = a[i], m = P.metais[chave];
-    const iniAno = isoMenos(h.data, 365), ano = [];
+    const iniAno = isoMenos(h.data, CFG.janela), ano = [];
     for (let j = i; j >= 0 && a[j].data > iniAno; j--) ano.push(a[j].brl);
     const pctAno = percentil(ano, h.brl);
-    const sinais = []; let pressao = 0;
+    const sinais = []; let pressao = 0, tend = 0, spr = 0, est = 0;
     if (i >= 59) {
       let s20 = 0, s60 = 0;
       for (let j = i - 59; j <= i; j++) { s60 += a[j].brl; if (j > i - 20) s20 += a[j].brl; }
       const m20 = s20 / 20, mm60 = s60 / 60;
-      if (m20 > mm60 * 1.01) { pressao++; sinais.push({ t: "alta", txt: "Tendência de alta: a média das últimas 4 semanas está acima da média de 3 meses." }); }
-      else if (m20 < mm60 * 0.99) { pressao--; sinais.push({ t: "baixa", txt: "Tendência de queda: a média das últimas 4 semanas está abaixo da média de 3 meses." }); }
+      if (m20 > mm60 * 1.01) { pressao++; tend = 1; sinais.push({ t: "alta", txt: "Tendência de alta: a média das últimas 4 semanas está acima da média de 3 meses." }); }
+      else if (m20 < mm60 * 0.99) { pressao--; tend = -1; sinais.push({ t: "baixa", txt: "Tendência de queda: a média das últimas 4 semanas está abaixo da média de 3 meses." }); }
       else sinais.push({ t: "neutro", txt: "Sem tendência clara nas últimas semanas." });
     }
     let spread = null;
     if (m.tem3m && h.m3 != null) {
       spread = (h.usd - h.m3) / h.usd * 100;
-      if (spread > 0.5) { pressao++; sinais.push({ t: "alta", txt: `Metal para entrega imediata está ${virg(spread)}% mais caro que para 3 meses: falta metal agora.` }); }
-      else if (spread < -1.5) { pressao--; sinais.push({ t: "baixa", txt: `Metal para 3 meses está ${virg(-spread)}% mais caro que o imediato: há metal sobrando agora.` }); }
+      if (spread > 0.5) { pressao++; spr = 1; sinais.push({ t: "alta", txt: `Metal para entrega imediata está ${virg(spread)}% mais caro que para 3 meses: falta metal agora.` }); }
+      else if (spread < -1.5) { pressao--; spr = -1; sinais.push({ t: "baixa", txt: `Metal para 3 meses está ${virg(-spread)}% mais caro que o imediato: há metal sobrando agora.` }); }
       else sinais.push({ t: "neutro", txt: "Preço imediato e de 3 meses próximos: mercado equilibrado." });
     }
     let ve30 = null;
@@ -102,25 +111,32 @@
       if (e30) {
         ve30 = variacao(h.estoque, e30);
         const t = Math.abs(ve30).toFixed(0);
-        if (ve30 < -5) { pressao++; sinais.push({ t: "alta", txt: `Estoque da LME caiu ${t}% em 30 dias: menos metal disponível.` }); }
-        else if (ve30 > 5) { pressao--; sinais.push({ t: "baixa", txt: `Estoque da LME subiu ${t}% em 30 dias: mais metal disponível.` }); }
+        if (ve30 < -5) { pressao++; est = 1; sinais.push({ t: "alta", txt: `Estoque da LME caiu ${t}% em 30 dias: menos metal disponível.` }); }
+        else if (ve30 > 5) { pressao--; est = -1; sinais.push({ t: "baixa", txt: `Estoque da LME subiu ${t}% em 30 dias: mais metal disponível.` }); }
         else sinais.push({ t: "neutro", txt: `Estoque da LME estável em 30 dias (${ve30 >= 0 ? "+" : "−"}${t}%).` });
       }
     }
     const j7 = idxAte(a.datas, isoMenos(h.data, 7)), v5 = j7 >= 0 ? variacao(h.brl, a[j7].brl) : 0, v5usd = j7 >= 0 ? variacao(h.usd, a[j7].usd) : 0;
     const pctDolar = pctDolarEm(h.data);
-    return { i, data: h.data, h, pctAno, pressao, sinais, spread, ve30, v5, v5usd, pctDolar };
+    return { i, data: h.data, h, pctAno, pressao, tend, spr, est, sinais, spread, ve30, v5, v5usd, pctDolar };
   }
+  const leituraCache = {};
+  const leitura = (chave, i) => { const c = chave + "|" + i; return leituraCache[c] || (leituraCache[c] = leituraEm(chave, i)); };
 
   // ---------- Índice de compra e de venda (0 a 100) ----------
   // Compra alta = preço em R$ baixo no ano + mercado empurrando para cima (vai encarecer) + dólar barato + queda forte na semana.
   // Venda alta  = preço em R$ alto no ano + mercado empurrando para baixo (vai baratear) + dólar caro + alta forte na semana.
+  // Sinal "para cima" (+1) ajuda a comprar e atrapalha vender; cada um com o seu peso.
+  function pontua(L, tipo, w) {
+    const s = tipo === "compra" ? 1 : -1;
+    return limita(50 + w.valor * s * (50 - L.pctAno)
+      + 8 * s * (w.tendencia * L.tend + w.spread * L.spr + w.estoque * L.est)
+      + w.dolar * s * (50 - L.pctDolar) * 0.2
+      + w.semana * 8 * (tipo === "compra" ? (L.v5 <= -3 ? 1 : 0) : (L.v5 >= 3 ? 1 : 0)));
+  }
   function indices(chave, i) {
-    const L = leituraEm(chave, i);
-    const quedaForte = L.v5 <= -3 ? 8 : 0, altaForte = L.v5 >= 3 ? 8 : 0;
-    const compra = limita((100 - L.pctAno) + L.pressao * 8 + (50 - L.pctDolar) * 0.2 + quedaForte);
-    const venda = limita(L.pctAno - L.pressao * 8 + (L.pctDolar - 50) * 0.2 + altaForte);
-    return { ...L, compra, venda };
+    const L = leitura(chave, i);
+    return { ...L, compra: pontua(L, "compra", CFG.compra), venda: pontua(L, "venda", CFG.venda) };
   }
   const FAIXAS = [ // [mínimo, nível, frase de compra, frase de venda]
     [75, "forte", "Compre agora", "Venda agora"],
@@ -283,6 +299,14 @@
     return itens.sort((x, y) => y.forca - x.forca);
   }
 
-  window.Analise = { serie, serieDolar, resumo, resumoDolar, janela, diasAtras, quantil, media, mediaMovel, percentil, variacao, ultimo, dolarEm,
+  // Só para a calibração: troca os pesos e limpa o que foi calculado com os antigos.
+  function configurar(c) {
+    if (c.janela && c.janela !== CFG.janela) for (const k in leituraCache) delete leituraCache[k];
+    Object.assign(CFG, c);
+    for (const k in histCache) delete histCache[k];
+    for (const k in resumoCache) delete resumoCache[k];
+  }
+
+  window.Analise = { configurar, leitura, pontua, CFG, serie, serieDolar, resumo, resumoDolar, janela, diasAtras, quantil, media, mediaMovel, percentil, variacao, ultimo, dolarEm,
     indices, historico, evidencia, rotulo, radar, FAIXAS };
 })();

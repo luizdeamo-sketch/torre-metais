@@ -84,7 +84,17 @@
     m.querySelectorAll("[data-metal]").forEach(el => el.onclick = () => { LS.set("tm_metal", el.dataset.metal); ir("metal", { metal: el.dataset.metal }); });
     m.querySelectorAll("[data-dolar]").forEach(el => { el.style.cursor = "pointer"; el.onclick = () => ir("dolar"); });
   }
+  // "Este sinal acerta?": com a memória de 15 anos da LME (js/pesos.js, gerado por coletor/calibrar.js) quando existe; senão, com os 2 anos do site.
   function textoEvidencia(k, tipo, v) {
+    const T = window.TM_PESOS, ev = T && T.evid && T.evid[k + "|" + tipo], nivel = A.rotulo(tipo, v).nivel;
+    if (ev && ev.every(p => p.faixas[nivel] && p.faixas[nivel].n >= 40)) {
+      const verbo = tipo === "compra" ? "subiu" : "caiu", [a, b] = ev, fa = a.faixas[nivel], fb = b.faixas[nivel];
+      const ajudou = p => p.faixas[nivel].acerto - p.base;
+      const conclusao = ajudou(a) > 3 && ajudou(b) > 3 ? "O sinal ajudou nos dois períodos."
+        : ajudou(a) > 3 || ajudou(b) > 3 ? "Ajudou num período e não no outro: use como termômetro de preço, não como previsão."
+        : "Não ajudou a prever: decida pelo seu planejamento e use a torre para saber onde o preço está.";
+      return `<b>Este sinal acerta?</b> Com o índice de ${tipo} nesta faixa, o preço em R$ ${verbo} nos 30 dias seguintes em <b>${nf(fa.acerto)}%</b> das vezes de ${a.de} a ${a.ate} e em <b>${nf(fb.acerto)}%</b> de ${b.de} para cá. Em qualquer dia: ${nf(a.base)}% e ${nf(b.base)}%. ${conclusao}`;
+    }
     const e = A.evidencia(k, tipo, v), h = A.historico(k);
     if (e.n < 15) return `Ainda há poucos dias parecidos no histórico (${e.n}) para medir se este sinal costuma acertar.`;
     const verbo = tipo === "compra" ? "subiu" : "caiu";
@@ -269,7 +279,11 @@
         <div class="card"><h3>Índice de compra (0 a 100)</h3><p class="mut">Sobe quando o preço em R$ está baixo no ano, quando o mercado empurra para cima (tendência, estoque caindo, metal imediato mais caro que o de 3 meses), quando o dólar está barato e depois de uma queda forte na semana. Acima de 60 abre uma janela de compra.</p></div>
         <div class="card"><h3>Índice de venda (0 a 100)</h3><p class="mut">Sobe quando o preço em R$ está alto no ano, quando o mercado mostra sinais de queda, quando o dólar está caro e depois de uma alta forte na semana. Acima de 60 abre uma janela de venda.</p></div>
         <div class="card"><h3>As faixas</h3><table class="peq">${A.FAIXAS.map((f, i) => `<tr><td class="num">${f[0]}${i ? "–" + (A.FAIXAS[i - 1][0] - 1) : "–100"}</td><td>${f[2]}</td><td>${f[3]}</td></tr>`).join("")}</table></div>
-        <div class="card"><h3>A torre mostra se acerta</h3><p class="mut">Na tela de cada metal, a torre conta quantas vezes, no passado, um índice na mesma faixa de hoje foi seguido pelo preço indo para o lado certo em 30 dias. Não é garantia: é a memória do mercado, com número.</p></div>
+        <div class="card"><h3>A torre mostra se acerta</h3>${(() => { const R = window.TM_PESOS && window.TM_PESOS.resumo; if (!R) return '<p class="mut">Na tela de cada metal, a torre conta quantas vezes um índice na mesma faixa de hoje foi seguido pelo preço indo para o lado certo em 30 dias.</p>';
+          const l = t => `<tr><td>${t === "compra" ? "Sinal de compra" : "Sinal de venda"}</td><td class="n">${nf(R[t].treino.acerto)}% <span class="mut">(${nf(R[t].treino.base)}%)</span></td><td class="n">${nf(R[t].prova.acerto)}% <span class="mut">(${nf(R[t].prova.base)}%)</span></td></tr>`;
+          return `<p class="mut">Testamos o índice em 15 anos dos 6 metais da LME. Acerto do sinal em 30 dias, e entre parênteses o acerto de comprar ou vender em qualquer dia:</p>
+          <div class="rolar"><table class="peq"><tr><th></th><th class="n">2009 a 2019</th><th class="n">2020 em diante</th></tr>${l("compra")}${l("venda")}</table></div>
+          <p class="mut peq">Até 2019, comprar quando o preço estava baixo no ano dava vantagem. De 2020 para cá, com o metal e o dólar subindo quase sem parar, a mesma regra deixou de funcionar. Por isso a torre mostra onde o preço está e avisa, mas a decisão de quando comprar segue com você. Cada metal mostra o próprio resultado.</p>`; })()}</div>
       </div>`;
     ligaCliques(m);
     m.querySelectorAll("[data-f]").forEach(b => b.onclick = () => ir("radar", { filtro: b.dataset.f }));
