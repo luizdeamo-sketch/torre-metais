@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 64">
+  <defs>
+    <linearGradient id="lingote" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F4F7FA"/><stop offset="1" stop-color="#A9BACB"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="#0B1F33"/>
+  <path d="M13 51h38l-4.5-8h-29z" fill="url(#lingote)"/>
+  <path d="M19.5 41h25l-3.8-7h-17.4z" fill="url(#lingote)"/>
+  <path d="M25 32h14l-3-6h-8z" fill="url(#lingote)"/>
+  <circle cx="32" cy="18.5" r="3.4" fill="#E07B2E"/>
+  <path d="M25.2 14.2a8.5 8.5 0 0 0 0 8.6M38.8 14.2a8.5 8.5 0 0 1 0 8.6" fill="none" stroke="#E07B2E" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M20.6 11.4a14 14 0 0 0 0 14.2M43.4 11.4a14 14 0 0 1 0 14.2" fill="none" stroke="#E07B2E" stroke-width="2.4" stroke-linecap="round" opacity=".55"/>
+  <text x="80" y="25" font-family="Manrope, Inter, Segoe UI, sans-serif" font-size="12.5" font-weight="700" letter-spacing="2.6" fill="#5B6B7B">TORRE DE CONTROLE</text>
+  <text x="79" y="54" font-family="Manrope, Inter, Segoe UI, sans-serif" font-size="30" font-weight="800" letter-spacing="-.5" fill="#0B1F33">Metais</text>
+  <rect x="182" y="44" width="10" height="10" rx="2" fill="#E07B2E"/>
+</svg>

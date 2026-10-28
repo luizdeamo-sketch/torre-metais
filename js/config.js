@@ -2,7 +2,7 @@
    SUPABASE_URL/SUPABASE_ANON: projeto do cliente (balão e Sugestões). Vazio = sugestões ficam guardadas neste aparelho até o banco existir. */
 window.CONFIG = {
   EMPRESA: "Metais",
-  VERSAO: "2026-10-28-1600",
+  VERSAO: "2026-10-28-1900",
   SUPABASE_URL: "",
   SUPABASE_ANON: "",
   EMAILS_LUIZ: ["luizdeamo@gmail.com", "luiz.amo@capacitycase.com.br"],
