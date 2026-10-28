@@ -1,5 +1,12 @@
 /* Quadro de Novidades: o que mudou em cada versão (a mais nova primeiro). */
 window.NOVIDADES = [
+  { versao: "2026-10-28-2100", data: "28/10/2026", itens: [
+    "Os índices de compra e venda deram lugar ao Termômetro do ano: 0 é o dia mais barato dos últimos 12 meses, 100 o mais caro. Ele diz onde o preço está, não para onde vai.",
+    "Risco dos próximos 30 dias em cada metal, com a memória da LME desde 2009: quanto o preço costuma mexer e quanto comprar em 4 lotes semanais protege.",
+    "Câmbio: quanto do sobe-e-desce em R$ vem do dólar e quando vale travar o câmbio com o banco.",
+    "Preço-alvo com a chance de chegar em 30 dias, aviso quando chega perto e quando chega.",
+    "O Radar agora sugere em vez de mandar: \"vale cotar\", \"considere lotes\".",
+  ] },
   { versao: "2026-10-28-2000", data: "28/10/2026", itens: [
     "\"Este sinal acerta?\" agora usa 15 anos da LME (2009 a 2026) e mostra o acerto separado em dois períodos: até 2019 e de 2020 para cá.",
     "No Radar, \"Como a torre decide\" mostra o teste completo do índice, com o acerto do sinal contra o acerto de comprar ou vender em qualquer dia.",

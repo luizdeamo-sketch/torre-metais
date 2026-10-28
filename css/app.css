@@ -228,3 +228,10 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 }
 @media (max-width:420px){.par-indices{gap:10px}.indice .n{font-size:26px;min-width:38px}.form{grid-template-columns:1fr 1fr}}
 @media (min-width:1800px){main{padding:34px 48px 100px}.metais{grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}}
+
+/* termômetro do ano (0 = mais barato dos 12 meses, 100 = mais caro) */
+.termo .rot{font:700 15px var(--f-tit);color:var(--ink);margin-top:2px}
+.termo .tn{font:800 34px/1 var(--f-tit);letter-spacing:-.03em}
+.termo.peq .tn{font-size:26px}.termo.peq .rot{font-size:14px}
+.termo.compra .tn{color:var(--compra)}.termo.venda .tn{color:var(--venda)}.termo.neutro .tn{color:var(--mut)}
+.cm .termo{margin-top:4px}
