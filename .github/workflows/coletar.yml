@@ -1,0 +1,21 @@
+name: Coletar preços
+on:
+  schedule:
+    - cron: "0 10,18 * * 1-5"   # 7h e 15h em Brasília
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python coletor/coletar.py
+      - run: |
+          git config user.name "coletor"
+          git config user.email "coletor@users.noreply.github.com"
+          git add data/precos.js
+          git diff --cached --quiet || git commit -m "Preços de $(date -u +%F)"
+          git push
